@@ -1,36 +1,64 @@
-'use client';
+'use client'
 
-import useSWR from 'swr';
-import { MdOutlineCleaningServices } from 'react-icons/md';
-import { LiaFireExtinguisherSolid } from 'react-icons/lia';
-import { AiOutlineMedicineBox } from 'react-icons/ai';
-import { GiSmokeBomb } from 'react-icons/gi';
-import { useState } from 'react';
-
-import { getRoom } from '@/libs/apis';
-import LoadingSpinner from '../../loading';
-import HotelPhotoGallery from '@/components/HotelPhotoGallery/HotelPhotoGallery';
-import toast from 'react-hot-toast';
+import useSWR from 'swr'
+import { MdOutlineCleaningServices } from 'react-icons/md'
+import { LiaFireExtinguisherSolid } from 'react-icons/lia'
+import { AiOutlineMedicineBox } from 'react-icons/ai'
+import { GiSmokeBomb } from 'react-icons/gi'
+import { useState } from 'react'
+import { getRoom } from '@/libs/apis'
+import LoadingSpinner from '../../loading'
+import HotelPhotoGallery from '@/components/HotelPhotoGallery/HotelPhotoGallery'
+import BookRoomCta from '@/components/BookRoomCta/BookRoomCta'
+import toast from 'react-hot-toast'
 
 const RoomDetails = (props: { params: { slug: string } }) => {
   const {
     params: { slug },
-  } = props;
+  } = props
 
-  const [checkinDate, setCheckinDate] = useState<Date | null>(null);
-  const [checkoutDate, setCheckoutDate] = useState<Date | null>(null);
-  const [adults, setAdults] = useState(1);
-  const [noOfChildren, setNoOfChildren] = useState(0);
+  const [checkinDate, setCheckinDate] = useState<Date | null>(null)
+  const [checkoutDate, setCheckoutDate] = useState<Date | null>(null)
+  const [adults, setAdults] = useState(1)
+  const [noOfChildren, setNoOfChildren] = useState(0)
 
-  const fetchRoom = async () => getRoom(slug);
+  const fetchRoom = async () => getRoom(slug)
 
-  const { data: room, error, isLoading } = useSWR('/api/room', fetchRoom);
+  const { data: room, error, isLoading } = useSWR('/api/room', fetchRoom)
 
-  if (error) throw new Error('Cannot fetch data');
+  if (error) throw new Error('Cannot fetch data')
   if (typeof room === 'undefined' && !isLoading)
-    throw new Error('Cannot fetch data');
+    throw new Error('Cannot fetch data')
 
-  if (!room) return <LoadingSpinner />;
+  if (!room) return <LoadingSpinner />
+
+  const calcMinCheckoutDate = () => {
+    if (checkinDate) {
+      const nextDay = new Date(checkinDate)
+      nextDay.setDate(nextDay.getDate() + 1)
+      return nextDay
+    }
+    return null
+  }
+
+  const handleBookNowClick = async () => {
+    if (!checkinDate || !checkoutDate)
+      return toast.error('Please provide checkin / checkout date')
+
+    if (checkinDate > checkoutDate)
+      return toast.error('Please choose a valid checkin period')
+
+    const numberOfDays = calcNumDays()
+    const hotelRoomSlug = room.slug.current
+    
+  }
+
+  const calcNumDays = () => {
+    if (!checkinDate || !checkoutDate) return
+    const timeDiff = checkoutDate.getTime() - checkinDate.getTime()
+    const noOfDays = Math.ceil(timeDiff / (24 * 60 * 60 * 1000))
+    return noOfDays
+  }
 
   return (
     <div>
@@ -44,7 +72,7 @@ const RoomDetails = (props: { params: { slug: string } }) => {
                 {room.name} ({room.dimension})
               </h2>
               <div className='flex my-11'>
-                {room.offeredAmenities != null && room.offeredAmenities.map(amenity => (
+                {room.offeredAmenities.map(amenity => (
                   <div
                     key={amenity._key}
                     className='md:w-44 w-fit text-center px-2 md:px-0 h-20 md:h-40 mr-3 bg-[#eff0f2] dark:bg-gray-800 rounded-lg grid place-content-center'
@@ -63,8 +91,11 @@ const RoomDetails = (props: { params: { slug: string } }) => {
               <div className='mb-11'>
                 <h2 className='font-bold text-3xl mb-2'>Offered Amenities</h2>
                 <div className='grid grid-cols-2'>
-                  {room.offeredAmenities != null && room.offeredAmenities.map(amenity => (
-                    <div key={amenity._key} className='flex items-center md:my-0 my-1'>
+                  {room.offeredAmenities.map(amenity => (
+                    <div
+                      key={amenity._key}
+                      className='flex items-center md:my-0 my-1'
+                    >
                       <i className={`fa-solid ${amenity.icon}`}></i>
                       <p className='text-xs md:text-base ml-2'>
                         {amenity.amenity}
@@ -104,19 +135,34 @@ const RoomDetails = (props: { params: { slug: string } }) => {
                   <p className='md:text-lg font-semibold'>Customer Reviews</p>
                 </div>
                 <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                  {/* <RoomReview /> */}
+                  {/* <RoomReview roomId={room._id} /> */}
                 </div>
               </div>
             </div>
           </div>
 
           <div className='md:col-span-4 rounded-xl shadow-lg dark:shadow dark:shadow-white sticky top-10 h-fit overflow-auto'>
-            {/* <BookRoom /> */}
+            <BookRoomCta
+              discount={room.discount}
+              price={room.price}
+              specialNote={room.specialNote}
+              checkinDate={checkinDate}
+              setCheckinDate={setCheckinDate}
+              checkoutDate={checkoutDate}
+              setCheckoutDate={setCheckoutDate}
+              calcMinCheckoutDate={calcMinCheckoutDate}
+              adults={adults}
+              noOfChildren={noOfChildren}
+              setAdults={setAdults}
+              setNoOfChildren={setNoOfChildren}
+              isBooked={room.isBooked}
+              handleBookNowClick={handleBookNowClick}
+            />
           </div>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default RoomDetails;
+export default RoomDetails
