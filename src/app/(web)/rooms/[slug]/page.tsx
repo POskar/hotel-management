@@ -11,6 +11,8 @@ import LoadingSpinner from '../../loading'
 import HotelPhotoGallery from '@/components/HotelPhotoGallery/HotelPhotoGallery'
 import BookRoomCta from '@/components/BookRoomCta/BookRoomCta'
 import toast from 'react-hot-toast'
+import axios from 'axios'
+import { getStripe } from '@/libs/stripe'
 
 const RoomDetails = (props: { params: { slug: string } }) => {
   const {
@@ -51,6 +53,29 @@ const RoomDetails = (props: { params: { slug: string } }) => {
     const numberOfDays = calcNumDays()
     const hotelRoomSlug = room.slug.current
     
+    const stripe = await getStripe()
+
+    try {
+      const {data: stripeSession} = await axios.post('/api/stripe', {
+        checkinDate,
+        checkoutDate,
+        adults,
+        children: noOfChildren,
+        numberOfDays,
+        hotelRoomSlug,
+      }) 
+
+      if (stripe) {
+        const result = await stripe.redirectToCheckout({ sessionId: stripeSession.id })
+        
+        if (result.error) {
+          toast.error('Payment failed')
+        }
+      }
+    } catch (error) {
+      console.log("Error: ", error)
+      toast.error("An error occured")
+    }
   }
 
   const calcNumDays = () => {
@@ -72,7 +97,7 @@ const RoomDetails = (props: { params: { slug: string } }) => {
                 {room.name} ({room.dimension})
               </h2>
               <div className='flex my-11'>
-                {room.offeredAmenities.map(amenity => (
+                {room.offeredAmenities && room.offeredAmenities.length > 0 && ( room.offeredAmenities.map(amenity => (
                   <div
                     key={amenity._key}
                     className='md:w-44 w-fit text-center px-2 md:px-0 h-20 md:h-40 mr-3 bg-[#eff0f2] dark:bg-gray-800 rounded-lg grid place-content-center'
@@ -82,7 +107,7 @@ const RoomDetails = (props: { params: { slug: string } }) => {
                       {amenity.amenity}
                     </p>
                   </div>
-                ))}
+                )))}
               </div>
               <div className='mb-11'>
                 <h2 className='font-bold text-3xl mb-2'>Description</h2>
@@ -91,7 +116,7 @@ const RoomDetails = (props: { params: { slug: string } }) => {
               <div className='mb-11'>
                 <h2 className='font-bold text-3xl mb-2'>Offered Amenities</h2>
                 <div className='grid grid-cols-2'>
-                  {room.offeredAmenities.map(amenity => (
+                  {room.offeredAmenities && room.offeredAmenities.length > 0 && ( room.offeredAmenities.map(amenity => (
                     <div
                       key={amenity._key}
                       className='flex items-center md:my-0 my-1'
@@ -101,7 +126,7 @@ const RoomDetails = (props: { params: { slug: string } }) => {
                         {amenity.amenity}
                       </p>
                     </div>
-                  ))}
+                  )))}
                 </div>
               </div>
               <div className='mb-11'>
