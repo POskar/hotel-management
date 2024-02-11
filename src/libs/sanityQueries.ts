@@ -75,7 +75,7 @@ export const getRoomReviewsQuery = groq`*[_type == "review" && hotelRoom._ref ==
     _id,
     text,
     user -> {
-        name
+    name
     },
     userRating
 }`

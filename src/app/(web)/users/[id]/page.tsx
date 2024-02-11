@@ -14,6 +14,8 @@ import { User } from '@/app/models/User'
 import { getUserBookings } from '@/libs/apis'
 import Table from '@/components/Table/Table'
 import Chart from '@/components/Chart/Chart'
+import RatingModal from '@/components/RatingModal/RatingModal'
+import BackDrop from '@/components/BackDrop/BackDrop'
 
 const UserDetails = (props: { params: { id: string } }) => {
 
@@ -21,6 +23,37 @@ const UserDetails = (props: { params: { id: string } }) => {
 
   const [currentNav, setCurrentNav] = useState<'bookings' | 'amount' | 'ratings' >('bookings')
   const [roomId, setRoomId] = useState<string | null>(null)
+  const [isRatingVisible, setIsRatingVisible] = useState(false)
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [ratingValue, setRatingValue] = useState<number | null>(0);
+  const [ratingText, setRatingText] = useState('');
+
+  const toggleRatingModal = () => setIsRatingVisible(prevState => !prevState);
+
+  const reviewSubmitHandler = async () => {
+    if (!ratingText.trim().length || !ratingValue) {
+      return toast.error('Please provide a rating text and a rating');
+    }
+
+    if (!roomId) toast.error('Id not provided');
+
+    setIsSubmittingReview(true)
+
+    try {
+      const { data } = await axios.post('/api/users', { reviewText: ratingText, ratingValue, roomId });
+      console.log(data);
+      toast.success('Review Submitted');
+    } catch (error) {
+      console.log(error);
+      toast.error('Review Failed');
+    } finally {
+      setRatingText('');
+      setRatingValue(null);
+      setRoomId(null);
+      setIsSubmittingReview(false);
+      setIsRatingVisible(false);
+    }
+  };
 
   const fetchUserBooking = async () => getUserBookings(userId)
   const fetchUserData = async () => {
@@ -145,6 +178,7 @@ const UserDetails = (props: { params: { id: string } }) => {
               <Table
                 bookingDetails={userBookings}
                 setRoomId={setRoomId}
+                toggleRatingModal={toggleRatingModal}
               />
             )
           ) : (
@@ -158,6 +192,18 @@ const UserDetails = (props: { params: { id: string } }) => {
           )}
         </div>
       </div>
+
+      <RatingModal
+        isOpen={isRatingVisible}
+        ratingValue={ratingValue}
+        setRatingValue={setRatingValue}
+        ratingText={ratingText}
+        setRatingText={setRatingText}
+        isSubmittingReview={isSubmittingReview}
+        reviewSubmitHandler={reviewSubmitHandler}
+        toggleRatingModal={toggleRatingModal}
+      />
+      <BackDrop isOpen={isRatingVisible}/>
     </div>
   );
 };
