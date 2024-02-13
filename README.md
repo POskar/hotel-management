@@ -13,14 +13,17 @@ Welcome to my Hotel Management System GitHub repository! This project is built u
 
 ## Screenshots
 
-1. **Featured Room**
-   ![Featured Room](public\images\readme\featured_room.PNG)
+1. **Featured Room** - displays pictures of the room, provides thorough description, and informs about the price as well as discount available.
+   
+   ![Featured Room](https://github.com/POskar/hotel-management/assets/45405600/c61fd2ac-ff5c-4df2-9a84-52bb4715bea3)
 
-2. **Room Details**
-   ![Room Details](public\images\readme\room_details.PNG)
+2. **Room Details** - contains a number of information about the room: description, offered amenities, safety and hygiene procedures, customer reviews along with the booking menu.
+   
+   ![Room Details](https://github.com/POskar/hotel-management/assets/45405600/36a2d63c-b580-483c-aa00-70facf5369a2)
 
-3. **User Profile**
-   ![User Profile](public\images\readme\user_profile.PNG)
+3. **User Profile** - here each user can find the information about their previous bookings, post a review about them, and check their total spendings.
+   
+   ![User Profile](https://github.com/POskar/hotel-management/assets/45405600/dc00e18e-7fd3-47ee-af94-29d7decfb62a)
 
 ## About
 
