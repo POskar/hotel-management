@@ -16,8 +16,6 @@ const RoomReview: FC<{ roomId: string }> = ({ roomId }) => {
     if (typeof roomReviews === 'undefined' && !isLoading)
     throw new Error('Cannot fetch data')
 
-    console.log(roomReviews)
-
     return (
     <>
         {roomReviews && roomReviews.map(review => (

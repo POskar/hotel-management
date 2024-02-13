@@ -41,7 +41,6 @@ const UserDetails = (props: { params: { id: string } }) => {
 
     try {
       const { data } = await axios.post('/api/users', { reviewText: ratingText, ratingValue, roomId });
-      console.log(data);
       toast.success('Review Submitted');
     } catch (error) {
       console.log(error);
